@@ -1050,81 +1050,580 @@ function navigateFilter(mood) {
 }
 
 /* ============================================================
-   AMBIENT RAIN SERENITY (SYNTHESIZED VIA WEB AUDIO API)
+   SOULFUL MUSIC ENGINE (WEB AUDIO API SYNTHESIZER)
+   5 Beautiful Ambient Tracks:
+   0: 🎹 Melancholy Piano (Raag / Nocturne Arpeggios)
+   1: 🪈 Soulful Bansuri Flute (Expressive Vibrato & Tanpura Drone)
+   2: 🌧️ Midnight Rain & Wind Chimes (Rain Bed + Crystal Bells)
+   3: 💫 Starlit Lo-Fi Dreams (Warm Rhodes 7ths & Vinyl Pulse)
+   4: 🍃 Forest Mist & Singing Bowls (Tibetan Shimmer & Wind)
 ============================================================ */
-var audioCtx = null;
-var rainNode = null;
-var rainGainNode = null;
-var isRainPlaying = false;
+var SOULFUL_TRACKS = [
+  { id: 0, icon: '🎹', name: 'Melancholy Piano', desc: 'Deep nocturnal piano arpeggios', type: 'piano' },
+  { id: 1, icon: '🪈', name: 'Soulful Bansuri Flute', desc: 'Meditative longing & warm strings', type: 'bansuri' },
+  { id: 2, icon: '🌧️', name: 'Midnight Rain & Chimes', desc: 'Gentle night rainfall & crystal wind bells', type: 'rain_chimes' },
+  { id: 3, icon: '💫', name: 'Starlit Lo-Fi Dreams', desc: 'Warm 7th chords & nostalgic vinyl pulse', type: 'lofi' },
+  { id: 4, icon: '🍃', name: 'Forest Mist & Singing Bowls', desc: 'Peaceful harmonic drone & tranquil bells', type: 'bowls' }
+];
 
-function toggleRainAmbience() {
-  var btn = document.getElementById('ambientToggleBtn');
-  var text = document.getElementById('ambientStatusText');
+var musicAudioCtx = null;
+var musicMasterGain = null;
+var musicDelayNode = null;
+var musicDelayGain = null;
+var isMusicPlaying = false;
+var currentMusicTrackIdx = 0;
+var musicTimers = [];
+var musicActiveNodes = [];
 
-  if (isRainPlaying) {
-    if (rainGainNode && audioCtx) {
-      rainGainNode.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
-      setTimeout(function() {
-        if (rainNode) {
-          try { rainNode.stop(); } catch(e) {}
-          rainNode.disconnect();
-        }
-        isRainPlaying = false;
-        if (btn) btn.classList.remove('active');
-        if (text) text.textContent = 'Play Rain Serenity';
-        showToast('🔇 Rain ambience paused');
-      }, 850);
-    }
-  } else {
-    try {
-      var AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!audioCtx) audioCtx = new AudioContextClass();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+function initMusicAudioContext() {
+  if (!musicAudioCtx) {
+    var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    musicAudioCtx = new AudioContextClass();
 
-      var bufferSize = 2 * audioCtx.sampleRate;
-      var noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      var output = noiseBuffer.getChannelData(0);
-      var b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    musicMasterGain = musicAudioCtx.createGain();
+    musicMasterGain.gain.setValueAtTime(0.001, musicAudioCtx.currentTime);
 
-      for (var i = 0; i < bufferSize; i++) {
-        var white = Math.random() * 2 - 1;
-        b0 = 0.99886 * b0 + white * 0.0555179;
-        b1 = 0.99332 * b1 + white * 0.0750759;
-        b2 = 0.96900 * b2 + white * 0.1538520;
-        b3 = 0.86650 * b3 + white * 0.3104856;
-        b4 = 0.55000 * b4 + white * 0.5329522;
-        b5 = -0.7616 * b5 - white * 0.0168980;
-        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.035;
-        b6 = white * 0.115926;
-      }
+    // Warm studio delay bus for acoustic depth
+    musicDelayNode = musicAudioCtx.createDelay();
+    musicDelayNode.delayTime.setValueAtTime(0.38, musicAudioCtx.currentTime);
 
-      rainNode = audioCtx.createBufferSource();
-      rainNode.buffer = noiseBuffer;
-      rainNode.loop = true;
+    musicDelayGain = musicAudioCtx.createGain();
+    musicDelayGain.gain.setValueAtTime(0.32, musicAudioCtx.currentTime);
 
-      var filter = audioCtx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(850, audioCtx.currentTime);
+    var delayFilter = musicAudioCtx.createBiquadFilter();
+    delayFilter.type = 'lowpass';
+    delayFilter.frequency.setValueAtTime(1400, musicAudioCtx.currentTime);
 
-      rainGainNode = audioCtx.createGain();
-      rainGainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
-      rainGainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 1.2);
+    musicDelayNode.connect(delayFilter);
+    delayFilter.connect(musicDelayGain);
+    musicDelayGain.connect(musicDelayNode);
+    musicDelayGain.connect(musicMasterGain);
 
-      rainNode.connect(filter);
-      filter.connect(rainGainNode);
-      rainGainNode.connect(audioCtx.destination);
+    musicMasterGain.connect(musicAudioCtx.destination);
+  }
 
-      rainNode.start(0);
-      isRainPlaying = true;
-      if (btn) btn.classList.add('active');
-      if (text) text.textContent = 'Pause Rain Ambience';
-      showToast('🌧️ Gentle rain serenity playing...');
-    } catch (e) {
-      console.warn("Web Audio rain notice:", e);
-      showToast('🎧 Audio active');
-    }
+  if (musicAudioCtx.state === 'suspended') {
+    musicAudioCtx.resume();
   }
 }
+
+function stopCurrentTrackMusic(fadeOutSec) {
+  var fade = fadeOutSec || 0.4;
+  musicTimers.forEach(function(t) { clearTimeout(t); clearInterval(t); });
+  musicTimers = [];
+
+  if (musicMasterGain && musicAudioCtx) {
+    try {
+      musicMasterGain.gain.cancelScheduledValues(musicAudioCtx.currentTime);
+      musicMasterGain.gain.linearRampToValueAtTime(0.001, musicAudioCtx.currentTime + fade);
+    } catch(e) {}
+  }
+
+  setTimeout(function() {
+    musicActiveNodes.forEach(function(node) {
+      try {
+        if (node.stop) node.stop();
+        node.disconnect();
+      } catch(e) {}
+    });
+    musicActiveNodes = [];
+  }, (fade + 0.05) * 1000);
+}
+
+/* --- TRACK 0: MELANCHOLY PIANO SYNTHESIS --- */
+function startMelancholyPianoTrack() {
+  var chords = [
+    [110.00, 164.81, 261.63, 329.63, 392.00, 493.88], // Am9
+    [87.31, 130.81, 220.00, 329.63, 392.00, 523.25],  // Fmaj7
+    [73.42, 110.00, 174.61, 261.63, 329.63, 440.00],  // Dm9
+    [82.41, 123.47, 196.00, 293.66, 392.00, 493.88]   // Em7
+  ];
+
+  var chordIdx = 0;
+  var noteIdx = 0;
+
+  function playPianoNote(freq, vel) {
+    if (!musicAudioCtx || !isMusicPlaying) return;
+    try {
+      var now = musicAudioCtx.currentTime;
+      var osc1 = musicAudioCtx.createOscillator();
+      var osc2 = musicAudioCtx.createOscillator();
+      var noteGain = musicAudioCtx.createGain();
+      var filter = musicAudioCtx.createBiquadFilter();
+
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(freq, now);
+
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(freq * 1.0015, now);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1600, now);
+      filter.frequency.exponentialRampToValueAtTime(320, now + 2.2);
+
+      var volume = (vel || 0.18) * 0.28;
+      noteGain.gain.setValueAtTime(0.001, now);
+      noteGain.gain.linearRampToValueAtTime(volume, now + 0.02);
+      noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.8);
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(noteGain);
+      noteGain.connect(musicMasterGain);
+      noteGain.connect(musicDelayNode);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 3.0);
+      osc2.stop(now + 3.0);
+
+      musicActiveNodes.push(osc1, osc2, noteGain, filter);
+    } catch(e) {}
+  }
+
+  function pianoTick() {
+    if (!isMusicPlaying) return;
+    var currentChord = chords[chordIdx];
+    var freq = currentChord[noteIdx % currentChord.length];
+
+    var vel = (noteIdx === 0) ? 0.35 : 0.22;
+    playPianoNote(freq, vel);
+
+    noteIdx++;
+    if (noteIdx >= currentChord.length) {
+      noteIdx = 0;
+      chordIdx = (chordIdx + 1) % chords.length;
+    }
+
+    var delay = 480 + Math.floor(Math.random() * 220);
+    var t = setTimeout(pianoTick, delay);
+    musicTimers.push(t);
+  }
+
+  pianoTick();
+}
+
+/* --- TRACK 1: SOULFUL BANSURI FLUTE & DRONE --- */
+function startBansuriFluteTrack() {
+  var droneNotes = [65.41, 98.00, 130.81]; // C2, G2, C3
+  droneNotes.forEach(function(freq) {
+    try {
+      var now = musicAudioCtx.currentTime;
+      var osc = musicAudioCtx.createOscillator();
+      var droneGain = musicAudioCtx.createGain();
+      var filter = musicAudioCtx.createBiquadFilter();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(260, now);
+
+      droneGain.gain.setValueAtTime(0.001, now);
+      droneGain.gain.linearRampToValueAtTime(0.09, now + 2.0);
+
+      osc.connect(filter);
+      filter.connect(droneGain);
+      droneGain.connect(musicMasterGain);
+
+      osc.start(now);
+      musicActiveNodes.push(osc, droneGain, filter);
+    } catch(e) {}
+  });
+
+  // Raag Bhairavi / Shivaranjani melodic notes
+  var fluteScale = [261.63, 293.66, 311.13, 392.00, 415.30, 466.16, 523.25, 622.25];
+
+  function playFlutePhrase() {
+    if (!isMusicPlaying) return;
+    try {
+      var note = fluteScale[Math.floor(Math.random() * fluteScale.length)];
+      var duration = 1.8 + Math.random() * 1.5;
+      var now = musicAudioCtx.currentTime;
+
+      var osc = musicAudioCtx.createOscillator();
+      var subOsc = musicAudioCtx.createOscillator();
+      var noteGain = musicAudioCtx.createGain();
+      var filter = musicAudioCtx.createBiquadFilter();
+
+      // Expressive vibrato LFO
+      var lfo = musicAudioCtx.createOscillator();
+      var lfoGain = musicAudioCtx.createGain();
+      lfo.frequency.setValueAtTime(4.6, now);
+      lfoGain.gain.setValueAtTime(4.5, now);
+      lfo.connect(osc.frequency);
+      lfo.connect(subOsc.frequency);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(note, now);
+
+      subOsc.type = 'triangle';
+      subOsc.frequency.setValueAtTime(note * 2, now);
+
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(note * 1.2, now);
+      filter.Q.setValueAtTime(2.2, now);
+
+      noteGain.gain.setValueAtTime(0.001, now);
+      noteGain.gain.linearRampToValueAtTime(0.24, now + 0.45);
+      noteGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      osc.connect(filter);
+      subOsc.connect(filter);
+      filter.connect(noteGain);
+      noteGain.connect(musicMasterGain);
+      noteGain.connect(musicDelayNode);
+
+      lfo.start(now);
+      osc.start(now);
+      subOsc.start(now);
+      lfo.stop(now + duration + 0.1);
+      osc.stop(now + duration + 0.1);
+      subOsc.stop(now + duration + 0.1);
+
+      musicActiveNodes.push(osc, subOsc, lfo, noteGain, filter);
+    } catch(e) {}
+
+    var pause = (duration * 1000) + 300 + Math.random() * 900;
+    var t = setTimeout(playFlutePhrase, pause);
+    musicTimers.push(t);
+  }
+
+  playFlutePhrase();
+}
+
+/* --- TRACK 2: MIDNIGHT RAIN & WIND CHIMES --- */
+function startRainAndChimesTrack() {
+  // Gentle continuous rain bed
+  try {
+    var bufferSize = 2 * musicAudioCtx.sampleRate;
+    var noiseBuffer = musicAudioCtx.createBuffer(1, bufferSize, musicAudioCtx.sampleRate);
+    var output = noiseBuffer.getChannelData(0);
+    var b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+
+    for (var i = 0; i < bufferSize; i++) {
+      var white = Math.random() * 2 - 1;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.96900 * b2 + white * 0.1538520;
+      b3 = 0.86650 * b3 + white * 0.3104856;
+      b4 = 0.55000 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.0168980;
+      output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.024;
+      b6 = white * 0.115926;
+    }
+
+    var rainSrc = musicAudioCtx.createBufferSource();
+    rainSrc.buffer = noiseBuffer;
+    rainSrc.loop = true;
+
+    var filter = musicAudioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(750, musicAudioCtx.currentTime);
+
+    var rainGain = musicAudioCtx.createGain();
+    rainGain.gain.setValueAtTime(0.001, musicAudioCtx.currentTime);
+    rainGain.gain.linearRampToValueAtTime(0.22, musicAudioCtx.currentTime + 1.2);
+
+    rainSrc.connect(filter);
+    filter.connect(rainGain);
+    rainGain.connect(musicMasterGain);
+
+    rainSrc.start(0);
+    musicActiveNodes.push(rainSrc, rainGain, filter);
+  } catch(e) {}
+
+  // Pentatonic Crystal Wind Bells
+  var chimeNotes = [659.25, 783.99, 880.00, 987.77, 1174.66, 1318.51, 1567.98];
+
+  function strikeChime() {
+    if (!isMusicPlaying) return;
+    try {
+      var freq = chimeNotes[Math.floor(Math.random() * chimeNotes.length)];
+      var now = musicAudioCtx.currentTime;
+
+      var osc1 = musicAudioCtx.createOscillator();
+      var osc2 = musicAudioCtx.createOscillator();
+      var chimeGain = musicAudioCtx.createGain();
+
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(freq, now);
+
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(freq * 2.76, now); // Metallic overtone
+
+      chimeGain.gain.setValueAtTime(0.001, now);
+      chimeGain.gain.linearRampToValueAtTime(0.12, now + 0.01);
+      chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.2);
+
+      osc1.connect(chimeGain);
+      osc2.connect(chimeGain);
+      chimeGain.connect(musicMasterGain);
+      chimeGain.connect(musicDelayNode);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 3.4);
+      osc2.stop(now + 3.4);
+
+      musicActiveNodes.push(osc1, osc2, chimeGain);
+    } catch(e) {}
+
+    var pause = 1200 + Math.random() * 2200;
+    var t = setTimeout(strikeChime, pause);
+    musicTimers.push(t);
+  }
+
+  strikeChime();
+}
+
+/* --- TRACK 3: STARLIT LO-FI DREAMS --- */
+function startLoFiDreamsTrack() {
+  var lofiChords = [
+    [130.81, 196.00, 246.94, 293.66, 329.63], // Cmaj9
+    [110.00, 196.00, 261.63, 329.63],         // Am7
+    [146.83, 174.61, 220.00, 261.63, 329.63], // Dm9
+    [98.00, 174.61, 246.94, 329.63, 392.00]   // G13
+  ];
+
+  var chordIdx = 0;
+
+  function playLoFiPad() {
+    if (!isMusicPlaying) return;
+    try {
+      var chord = lofiChords[chordIdx];
+      chordIdx = (chordIdx + 1) % lofiChords.length;
+      var now = musicAudioCtx.currentTime;
+      var duration = 4.2;
+
+      chord.forEach(function(freq) {
+        var osc = musicAudioCtx.createOscillator();
+        var padGain = musicAudioCtx.createGain();
+        var filter = musicAudioCtx.createBiquadFilter();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(680, now);
+
+        padGain.gain.setValueAtTime(0.001, now);
+        padGain.gain.linearRampToValueAtTime(0.045, now + 0.8);
+        padGain.gain.setValueAtTime(0.04, now + duration - 0.9);
+        padGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(filter);
+        filter.connect(padGain);
+        padGain.connect(musicMasterGain);
+        padGain.connect(musicDelayNode);
+
+        osc.start(now);
+        osc.stop(now + duration + 0.1);
+        musicActiveNodes.push(osc, padGain, filter);
+      });
+    } catch(e) {}
+
+    var t = setTimeout(playLoFiPad, 3900);
+    musicTimers.push(t);
+  }
+
+  playLoFiPad();
+}
+
+/* --- TRACK 4: FOREST MIST & TIBETAN SINGING BOWLS --- */
+function startSingingBowlsTrack() {
+  // Misty harmonic drone
+  try {
+    var now = musicAudioCtx.currentTime;
+    var droneOsc = musicAudioCtx.createOscillator();
+    var droneGain = musicAudioCtx.createGain();
+    droneOsc.type = 'sine';
+    droneOsc.frequency.setValueAtTime(108, now); // Sacred root
+    droneGain.gain.setValueAtTime(0.001, now);
+    droneGain.gain.linearRampToValueAtTime(0.08, now + 2.0);
+    droneOsc.connect(droneGain);
+    droneGain.connect(musicMasterGain);
+    droneOsc.start(now);
+    musicActiveNodes.push(droneOsc, droneGain);
+  } catch(e) {}
+
+  var bowlFrequencies = [216.0, 288.0, 324.0, 432.0];
+
+  function strikeSingingBowl() {
+    if (!isMusicPlaying) return;
+    try {
+      var baseFreq = bowlFrequencies[Math.floor(Math.random() * bowlFrequencies.length)];
+      var now = musicAudioCtx.currentTime;
+
+      // Dual frequencies creating relaxing acoustic beat frequency
+      var osc1 = musicAudioCtx.createOscillator();
+      var osc2 = musicAudioCtx.createOscillator();
+      var overtoneOsc = musicAudioCtx.createOscillator();
+      var bowlGain = musicAudioCtx.createGain();
+
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(baseFreq, now);
+
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(baseFreq + 1.8, now); // 1.8Hz soothing acoustic shimmer
+
+      overtoneOsc.type = 'sine';
+      overtoneOsc.frequency.setValueAtTime(baseFreq * 2.81, now);
+
+      bowlGain.gain.setValueAtTime(0.001, now);
+      bowlGain.gain.linearRampToValueAtTime(0.16, now + 0.8);
+      bowlGain.gain.exponentialRampToValueAtTime(0.0001, now + 6.5);
+
+      osc1.connect(bowlGain);
+      osc2.connect(bowlGain);
+      overtoneOsc.connect(bowlGain);
+      bowlGain.connect(musicMasterGain);
+      bowlGain.connect(musicDelayNode);
+
+      osc1.start(now);
+      osc2.start(now);
+      overtoneOsc.start(now);
+      osc1.stop(now + 6.8);
+      osc2.stop(now + 6.8);
+      overtoneOsc.stop(now + 6.8);
+
+      musicActiveNodes.push(osc1, osc2, overtoneOsc, bowlGain);
+    } catch(e) {}
+
+    var pause = 4500 + Math.random() * 2500;
+    var t = setTimeout(strikeSingingBowl, pause);
+    musicTimers.push(t);
+  }
+
+  strikeSingingBowl();
+}
+
+/* --- PLAY ENGINE CONTROLLER --- */
+function startMusicPlayback(trackIndex) {
+  initMusicAudioContext();
+  stopCurrentTrackMusic(0.25);
+
+  currentMusicTrackIdx = trackIndex;
+  var track = SOULFUL_TRACKS[currentMusicTrackIdx] || SOULFUL_TRACKS[0];
+
+  setTimeout(function() {
+    if (!isMusicPlaying) return;
+    try {
+      musicMasterGain.gain.cancelScheduledValues(musicAudioCtx.currentTime);
+      musicMasterGain.gain.setValueAtTime(0.001, musicAudioCtx.currentTime);
+      musicMasterGain.gain.linearRampToValueAtTime(0.35, musicAudioCtx.currentTime + 1.0);
+    } catch(e) {}
+
+    switch (track.type) {
+      case 'piano':
+        startMelancholyPianoTrack();
+        break;
+      case 'bansuri':
+        startBansuriFluteTrack();
+        break;
+      case 'rain_chimes':
+        startRainAndChimesTrack();
+        break;
+      case 'lofi':
+        startLoFiDreamsTrack();
+        break;
+      case 'bowls':
+        startSingingBowlsTrack();
+        break;
+      default:
+        startMelancholyPianoTrack();
+    }
+  }, 260);
+
+  updateMusicPlayerUI();
+}
+
+function updateMusicPlayerUI() {
+  var pill = document.getElementById('musicPlayerPill');
+  var playIcon = document.getElementById('musicPlayIcon');
+  var titleText = document.getElementById('musicTitleText');
+  var currentTrack = SOULFUL_TRACKS[currentMusicTrackIdx];
+
+  if (titleText && currentTrack) {
+    titleText.textContent = currentTrack.icon + ' ' + currentTrack.name;
+  }
+
+  if (pill) {
+    if (isMusicPlaying) {
+      pill.classList.add('playing');
+    } else {
+      pill.classList.remove('playing');
+    }
+  }
+
+  if (playIcon) {
+    playIcon.textContent = isMusicPlaying ? '⏸' : '▶';
+  }
+
+  // Update active state in track list
+  SOULFUL_TRACKS.forEach(function(t, idx) {
+    var item = document.getElementById('mtrack-' + idx);
+    if (item) {
+      if (idx === currentMusicTrackIdx) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    }
+  });
+}
+
+function toggleMusicPlayback() {
+  if (isMusicPlaying) {
+    isMusicPlaying = false;
+    stopCurrentTrackMusic(0.5);
+    updateMusicPlayerUI();
+    showToast('🔇 Music paused');
+  } else {
+    isMusicPlaying = true;
+    startMusicPlayback(currentMusicTrackIdx);
+    var track = SOULFUL_TRACKS[currentMusicTrackIdx];
+    showToast('🎵 Playing: ' + track.name);
+  }
+}
+
+function nextMusicTrack() {
+  currentMusicTrackIdx = (currentMusicTrackIdx + 1) % SOULFUL_TRACKS.length;
+  isMusicPlaying = true;
+  startMusicPlayback(currentMusicTrackIdx);
+  var track = SOULFUL_TRACKS[currentMusicTrackIdx];
+  showToast('⏭️ Switched to: ' + track.name);
+}
+
+function selectMusicTrack(index) {
+  if (index >= 0 && index < SOULFUL_TRACKS.length) {
+    currentMusicTrackIdx = index;
+    isMusicPlaying = true;
+    startMusicPlayback(currentMusicTrackIdx);
+    var drop = document.getElementById('musicDropdown');
+    if (drop) drop.classList.remove('open');
+    var track = SOULFUL_TRACKS[currentMusicTrackIdx];
+    showToast('✨ Now Playing: ' + track.name);
+  }
+}
+
+function toggleTrackMenu() {
+  var drop = document.getElementById('musicDropdown');
+  if (drop) {
+    drop.classList.toggle('open');
+  }
+}
+
+// Close track menu when clicking anywhere outside
+document.addEventListener('click', function(e) {
+  var pill = document.getElementById('musicPlayerPill');
+  var drop = document.getElementById('musicDropdown');
+  if (drop && drop.classList.contains('open')) {
+    if (!pill || !pill.contains(e.target)) {
+      drop.classList.remove('open');
+    }
+  }
+});
 
 /* ============================================================
    START REALTIME FIRESTORE LISTENER

@@ -32,13 +32,72 @@
      PAGE: HOME
 ==================================================== -->
 <div class="page active" id="page-home">
-  <!-- Ambient Audio Floating Pill Player -->
+  <!-- Soulful Music Floating Player Dock -->
   <div class="ambient-bar">
-    <button class="ambient-pill-btn" id="ambientToggleBtn" onclick="toggleRainAmbience()" title="Play or pause relaxing night rain ambience">
-      <span class="ambient-pulse-dot" id="ambientDot"></span>
-      <span class="ambient-icon">🎧</span>
-      <span id="ambientStatusText">Play Rain Serenity</span>
-    </button>
+    <div class="music-player-pill" id="musicPlayerPill">
+      <!-- Play / Pause Button -->
+      <button class="music-pill-ctrl" id="musicToggleBtn" onclick="toggleMusicPlayback()" title="Play or pause soulful background music">
+        <span class="music-play-icon" id="musicPlayIcon">▶</span>
+      </button>
+
+      <!-- Equalizer Visualizer Bars -->
+      <div class="music-eq" id="musicEq" title="Audio Visualizer">
+        <span class="eq-col eq-1"></span>
+        <span class="eq-col eq-2"></span>
+        <span class="eq-col eq-3"></span>
+      </div>
+
+      <!-- Current Track Info & Menu Trigger -->
+      <div class="music-meta" onclick="toggleTrackMenu()" title="Click to choose a music mood">
+        <span class="music-tag">MUSIC</span>
+        <span class="music-title" id="musicTitleText">🎹 Melancholy Piano</span>
+      </div>
+
+      <!-- Quick Next Track Button (Changes music anytime!) -->
+      <button class="music-pill-skip" onclick="nextMusicTrack()" title="Next Track (Changes music anytime!)">
+        <span>⏭️</span>
+      </button>
+
+      <!-- Track Dropdown Selector Menu -->
+      <div class="music-dropdown" id="musicDropdown">
+        <div class="music-dropdown-header">🎵 Select Soulful Mood</div>
+        <div class="music-track-item active" id="mtrack-0" onclick="selectMusicTrack(0)">
+          <span class="mti-icon">🎹</span>
+          <div class="mti-body">
+            <span class="mti-name">Melancholy Piano</span>
+            <span class="mti-desc">Deep nocturnal piano arpeggios</span>
+          </div>
+        </div>
+        <div class="music-track-item" id="mtrack-1" onclick="selectMusicTrack(1)">
+          <span class="mti-icon">🪈</span>
+          <div class="mti-body">
+            <span class="mti-name">Soulful Bansuri Flute</span>
+            <span class="mti-desc">Meditative longing & warm strings</span>
+          </div>
+        </div>
+        <div class="music-track-item" id="mtrack-2" onclick="selectMusicTrack(2)">
+          <span class="mti-icon">🌧️</span>
+          <div class="mti-body">
+            <span class="mti-name">Midnight Rain & Chimes</span>
+            <span class="mti-desc">Gentle night rainfall & crystal wind bells</span>
+          </div>
+        </div>
+        <div class="music-track-item" id="mtrack-3" onclick="selectMusicTrack(3)">
+          <span class="mti-icon">💫</span>
+          <div class="mti-body">
+            <span class="mti-name">Starlit Lo-Fi Dreams</span>
+            <span class="mti-desc">Warm 7th chords & nostalgic vinyl pulse</span>
+          </div>
+        </div>
+        <div class="music-track-item" id="mtrack-4" onclick="selectMusicTrack(4)">
+          <span class="mti-icon">🍃</span>
+          <div class="mti-body">
+            <span class="mti-name">Forest Mist & Singing Bowls</span>
+            <span class="mti-desc">Peaceful harmonic drone & tranquil bells</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="hero">
