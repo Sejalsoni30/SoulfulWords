@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shayri — Memories That Never Fade</title>
+  <meta name="description" content="A heartfelt collection of Shayri in Hindi and English. Read, feel, and share your own poetry." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Lato:wght@300;400;700&family=Hind:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="cursorGlow"></div>
+<canvas id="stars-canvas"></canvas>
+<div class="emoji-layer" id="emojiLayer"></div>
+<div id="toast">✨ Shayri added successfully!</div>
+
+<!-- ======== NAVBAR ======== -->
+<nav>
+  <a href="#" class="nav-logo" id="navLogo" onclick="navigate('home');return false;">Shayri 🌿</a>
+  <ul class="nav-pages">
+    <li><button class="nav-btn active" onclick="navigate('home')"   id="nb-home">🏠 Home</button></li>
+    <li><button class="nav-btn"        onclick="navigate('explore')" id="nb-explore">✨ Explore</button></li>
+    <li><button class="nav-btn"        onclick="navigate('about')"   id="nb-about">💫 About</button></li>
+    <li><button class="nav-submit-btn" onclick="navigate('submit')">✍️ Add Shayri</button></li>
+  </ul>
+</nav>
+
+<!-- ===================================================
+     PAGE: HOME
+==================================================== -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-content">
+      <span class="moon-badge">🌙</span>
+      <div class="brand-tag">
+        <span class="brand-dot"></span>
+        <span>Poetry of the Heart</span>
+        <span class="brand-dot"></span>
+      </div>
+      <h1 class="site-title">Shayri</h1>
+      <p class="site-subtitle">Memories That Never Fade — Poetry That Lasts Forever</p>
+    </div>
+
+    <div class="hero-card" id="featured-card">
+      <span class="quote-icon">"</span>
+      <p class="shayri-text">
+        <span class="shayri-line">Who says that once the <span class="hl">night is over</span>,</span>
+        <span class="shayri-line">the matter is <span class="hl">forgotten</span>?</span>
+      </p>
+      <div class="divider"><span>✦</span></div>
+      <p class="shayri-text">
+        <span class="shayri-line shayri-line2">I still remember <span class="hl">his name</span></span>
+        <span class="shayri-line shayri-line2">to <span class="hl">this day</span> 💔</span>
+      </p>
+
+      <div class="sticker-row">
+        <span class="sticker">🌿</span>
+        <span class="sticker">🌙</span>
+        <span class="sticker">💔</span>
+        <span class="sticker">🍃</span>
+        <span class="sticker">✨</span>
+      </div>
+
+      <div class="emotion-row">
+        <span class="e-tag a">💚 Memory</span>
+        <span class="e-tag b">🌿 Nature</span>
+        <span class="e-tag c">🌙 Night</span>
+        <span class="e-tag a">✨ Love</span>
+        <span class="e-tag b">🥀 Longing</span>
+      </div>
+
+      <div class="author-tag">
+        <div class="author-av">🖊️</div>
+        <div class="author-info">
+          <small>Featured Poetry</small>
+          <strong>Memories — A Heart's Story</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Explore More</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </div>
+
+  <!-- Reflection card below hero -->
+  <div style="padding:5rem 1.5rem 6rem;display:flex;justify-content:center;">
+    <div class="hero-card reveal" style="max-width:660px;text-align:center;">
+      <p class="form-label" style="margin-bottom:1.2rem;">🌿 Reflection — A Verse to Remember</p>
+      <p class="shayri-text" style="font-size:clamp(1rem,2.5vw,1.4rem);">
+        &ldquo;The night may end,<br/>
+        but love leaves its mark —<br/>
+        I carry his name like a prayer,<br/>
+        long after the stars have gone quiet.&rdquo;
+      </p>
+      <div class="emotion-row">
+        <span class="e-tag c">🌙 Moonlight</span>
+        <span class="e-tag a">✨ Emerald Stars</span>
+        <span class="e-tag b">💚 Heart</span>
+      </div>
+      <div style="margin-top:1.5rem;">
+        <button class="nav-submit-btn" onclick="navigate('explore')">✨ Read More Shayri →</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-logo">Shayri 🌿</span>
+    <p>Crafted with 💚 for the ones who remember</p>
+    <p style="margin-top:.4rem;">Memories never fade — they simply become poems.</p>
+  </footer>
+</div>
+
+<!-- ===================================================
+     PAGE: EXPLORE
+==================================================== -->
+<div class="page" id="page-explore">
+  <div class="page-content">
+    <h1 class="page-title">✨ Explore Shayri</h1>
+    <p class="page-subtitle">A living collection — growing with every heart that shares</p>
+
+    <div class="db-status-bar">
+      <span class="db-pill" id="dbStatusBadge">
+        <span class="db-dot"></span>
+        <span id="dbStatusText">🔥 Connecting to Cloud Firestore...</span>
+      </span>
+    </div>
+
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" data-filter="all">All 🌿</button>
+      <button class="filter-btn" data-filter="love">Love 💚</button>
+      <button class="filter-btn" data-filter="pain">Pain 💔</button>
+      <button class="filter-btn" data-filter="night">Night 🌙</button>
+      <button class="filter-btn" data-filter="longing">Longing 🥀</button>
+      <button class="filter-btn" data-filter="hope">Hope 🍃</button>
+      <button class="filter-btn" data-filter="english">English 🇬🇧</button>
+      <button class="filter-btn" data-filter="hindi">Hindi 🇮🇳</button>
+    </div>
+
+    <div class="shayri-grid" id="shayriGrid"></div>
+  </div>
+  <footer>
+    <span class="footer-logo">Shayri 🌿</span>
+    <p>Crafted with 💚 for the ones who remember</p>
+  </footer>
+</div>
+
+<!-- ===================================================
+     PAGE: SUBMIT
+==================================================== -->
+<div class="page" id="page-submit">
+  <div class="page-content">
+    <h1 class="page-title">✍️ Share Your Shayri</h1>
+    <p class="page-subtitle">Pour your heart — the world is listening</p>
+
+    <div class="submit-wrap">
+      <div class="success-banner" id="successBanner">
+        <h3>🎉 Your Shayri is Live!</h3>
+        <p>It has been added to the Explore page for everyone to read.</p>
+      </div>
+
+      <!-- Firebase Rules Assistant -->
+      <div class="rules-guide-banner" id="rulesGuideBanner" style="display:none;">
+        <div class="rules-guide-header">
+          <span>⚠️ Firebase Permission Denied (Missing Rules)</span>
+          <button class="rules-close-btn" onclick="document.getElementById('rulesGuideBanner').style.display='none'">✕</button>
+        </div>
+        <p style="margin:.5rem 0 .8rem;font-size:.85rem;color:rgba(254,240,138,.9);">
+          Google Firebase defaults to locked mode for security. To let anyone save and read poems, update your rules in <strong>Firebase Console</strong>:
+        </p>
+        <ol class="rules-steps">
+          <li>Go to <a href="https://console.firebase.google.com/project/soulmatewords-1b474/firestore/rules" target="_blank" rel="noopener" style="color:#6ee7b7;text-decoration:underline;">Firebase Console → Firestore Database → Rules</a></li>
+          <li>Paste these 7 lines into the rules editor:
+            <pre class="rules-code"><code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}</code></pre>
+          </li>
+          <li>Click the blue <strong>Publish</strong> button!</li>
+        </ol>
+        <button class="copy-rules-btn" id="copyRulesBtn" onclick="copyFirebaseRules()">📋 Copy Rules to Clipboard</button>
+      </div>
+
+      <div class="submit-card">
+        <!-- Language toggle -->
+        <div class="form-group">
+          <div class="form-label">Language / भाषा</div>
+          <div class="lang-toggle">
+            <button class="lang-btn active" id="langEn" onclick="setLang('english')">🇬🇧 English</button>
+            <button class="lang-btn" id="langHi" onclick="setLang('hindi')">🇮🇳 Hindi (हिंदी)</button>
+          </div>
+        </div>
+
+        <!-- Author name -->
+        <div class="form-group">
+          <label class="form-label" for="authorName">Your Name / तुम्हारा नाम</label>
+          <input class="form-input" id="authorName" type="text" placeholder="Anonymous Poet..." maxlength="40" />
+        </div>
+
+        <!-- Shayri text -->
+        <div class="form-group">
+          <label class="form-label" for="shayriText">Your Shayri</label>
+          <textarea class="form-textarea" id="shayriText" placeholder="Write your shayri here..." maxlength="500"></textarea>
+          <div style="text-align:right;font-size:.72rem;color:rgba(167,243,208,.4);margin-top:.3rem;" id="charCount">0 / 500</div>
+        </div>
+
+        <!-- Mood -->
+        <div class="form-group">
+          <div class="form-label">Mood / मूड</div>
+          <div class="mood-grid" id="moodGrid">
+            <button class="mood-chip" data-mood="love">💚 Love</button>
+            <button class="mood-chip" data-mood="pain">💔 Pain</button>
+            <button class="mood-chip" data-mood="night">🌙 Night</button>
+            <button class="mood-chip" data-mood="longing">🥀 Longing</button>
+            <button class="mood-chip" data-mood="hope">🍃 Hope</button>
+            <button class="mood-chip" data-mood="memories">🕯️ Memories</button>
+            <button class="mood-chip" data-mood="happiness">🌿 Peace</button>
+            <button class="mood-chip" data-mood="separation">💫 Separation</button>
+          </div>
+        </div>
+
+        <!-- Emoji -->
+        <div class="form-group">
+          <label class="form-label" for="shayriEmoji">Pick an Emoji 🎭</label>
+          <select class="form-select" id="shayriEmoji">
+            <option value="🌙">🌙 Moon</option>
+            <option value="🌿">🌿 Emerald Leaf</option>
+            <option value="🍃">🍃 Forest Pine</option>
+            <option value="💚">💚 Green Heart</option>
+            <option value="💔">💔 Broken Heart</option>
+            <option value="🥀">🥀 Wilted Rose</option>
+            <option value="✨">✨ Stars</option>
+            <option value="🕯️">🕯️ Candle</option>
+            <option value="🌹">🌹 Rose</option>
+            <option value="💌">💌 Letter</option>
+            <option value="🌊">🌊 Lake Waves</option>
+            <option value="🌸">🌸 Blossom</option>
+          </select>
+        </div>
+
+        <button class="submit-btn" onclick="submitShayri()" id="submitBtn">
+          ✨ Publish My Shayri
+        </button>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <span class="footer-logo">Shayri 🌿</span>
+    <p>Crafted with 💚 for the ones who remember</p>
+  </footer>
+</div>
+
+<!-- ===================================================
+     PAGE: ABOUT
+==================================================== -->
+<div class="page" id="page-about">
+  <div class="about-hero">
+    <div class="about-hero-content">
+      <h1 class="site-title" style="font-size:clamp(1.8rem,5vw,3.5rem);">About Shayri</h1>
+      <p class="site-subtitle" style="margin-top:.5rem;">A space where feelings find words</p>
+    </div>
+  </div>
+
+  <div class="page-content" style="padding-top:2rem;">
+    <div class="hero-card reveal" style="max-width:720px;margin:0 auto 3rem;text-align:center;">
+      <p class="shayri-text" style="font-size:1.1rem;line-height:2;">
+        &ldquo;Shayri is not just poetry.<br/>
+        It is the language of the soul —<br/>
+        the words that escape us in the silence,<br/>
+        the ones we whisper only to the stars.&rdquo;
+      </p>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-card reveal">
+        <span class="about-card-icon">🌍</span>
+        <h3>Two Languages, One Feeling</h3>
+        <p>Share and read poetry in Hindi or English — because feelings have no borders.</p>
+      </div>
+      <div class="about-card reveal">
+        <span class="about-card-icon">✍️</span>
+        <h3>Share Your Voice</h3>
+        <p>Anyone can submit their own shayri. Your words could touch someone's heart today.</p>
+      </div>
+      <div class="about-card reveal">
+        <span class="about-card-icon">🔥</span>
+        <h3>Live & Growing</h3>
+        <p>Every submission is saved and displayed in the Explore section for all to discover.</p>
+      </div>
+      <div class="about-card reveal">
+        <span class="about-card-icon">💚</span>
+        <h3>Mood Filters</h3>
+        <p>Find poetry by mood — love, pain, hope, night — whatever you feel right now.</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:3.5rem;">
+      <button class="nav-submit-btn" style="padding:.7rem 2rem;font-size:.95rem;" onclick="navigate('submit')">✍️ Add Your Shayri</button>
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-logo">Shayri 🌿</span>
+    <p>Crafted with 💚 for the ones who remember</p>
+    <p style="margin-top:.4rem;">Memories never fade — they simply become poems.</p>
+  </footer>
+</div>
+
+<!-- Firebase App & Cloud Firestore SDKs (Compat v10 for universal web & file support) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
