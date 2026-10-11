@@ -23,27 +23,23 @@ var SEED = [
 
 /* ============================================================
    FIREBASE CLOUD FIRESTORE INITIALIZATION
+   Reads environment configuration from window.firebaseConfig (config.js)
 ============================================================ */
-var firebaseConfig = {
-  apiKey: "AIzaSyAOTRAuoCWlTMSxXUr1Ze7gNsu3ItwuC3c",
-  authDomain: "soulmatewords-1b474.firebaseapp.com",
-  projectId: "soulmatewords-1b474",
-  storageBucket: "soulmatewords-1b474.firebasestorage.app",
-  messagingSenderId: "469339484488",
-  appId: "1:469339484488:web:1071d1ad881928701e837d"
-};
+var firebaseConfig = window.firebaseConfig || null;
 
 var db = null;
 var firestoreShayris = [];
 var isFirestoreOnline = false;
 
 try {
-  if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+  if (firebaseConfig && typeof firebase !== 'undefined' && firebase.initializeApp) {
     if (!firebase.apps || !firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
     db = firebase.firestore();
     console.log("🔥 Firebase initialized for project:", firebaseConfig.projectId);
+  } else if (!firebaseConfig) {
+    console.warn("⚠️ No Firebase config detected. Please ensure config.js is loaded with your Firebase credentials.");
   }
 } catch (e) {
   console.warn("Firebase initialization notice:", e);

@@ -10,3 +10,10 @@ Thumbs.db
 node_modules/
 npm-debug.log
 *.log
+
+# Environment & Sensitive Keys
+.env
+.env.local
+.env.*.local
+config.js
+

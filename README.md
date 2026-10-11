@@ -31,7 +31,14 @@
    ```bash
    git clone https://github.com/Sejalsoni30/SoulfulWords.git
    ```
-2. Open `index.html` directly in your browser:
+2. Setup your Firebase credentials:
+   - Copy `config.example.js` to `config.js`:
+     ```bash
+     cp config.example.js config.js
+     ```
+   - Enter your Firebase project credentials in `config.js` (this file is git-ignored for safety).
+   - Alternatively, a `.env.example` file is provided for environment variable reference.
+3. Open `index.html` directly in your browser:
    - Double-click `index.html`, or
    - Use VS Code Live Server / any local HTTP server.
 
