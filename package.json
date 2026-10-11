@@ -1,0 +1,19 @@
+{
+  "name": "soulfulwords",
+  "version": "1.0.0",
+  "description": "Heartfelt Shayri Single Page Application with Realtime Firebase Firestore & Ambient Music",
+  "main": "index.html",
+  "scripts": {
+    "build": "node build.js",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "shayri",
+    "poetry",
+    "firebase",
+    "firestore",
+    "music"
+  ],
+  "author": "Sejal Soni",
+  "license": "MIT"
+}

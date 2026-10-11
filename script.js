@@ -24,8 +24,18 @@ var SEED = [
 /* ============================================================
    FIREBASE CLOUD FIRESTORE INITIALIZATION
    Reads environment configuration from window.firebaseConfig (config.js)
+   with fallback defaults for zero-config production deployments
 ============================================================ */
-var firebaseConfig = window.firebaseConfig || null;
+var DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAOTRAuoCWlTMSxXUr1Ze7gNsu3ItwuC3c",
+  authDomain: "soulmatewords-1b474.firebaseapp.com",
+  projectId: "soulmatewords-1b474",
+  storageBucket: "soulmatewords-1b474.firebasestorage.app",
+  messagingSenderId: "469339484488",
+  appId: "1:469339484488:web:1071d1ad881928701e837d"
+};
+
+var firebaseConfig = window.firebaseConfig || DEFAULT_FIREBASE_CONFIG;
 
 var db = null;
 var firestoreShayris = [];
