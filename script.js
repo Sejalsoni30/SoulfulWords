@@ -811,6 +811,322 @@ navigate = function(page) {
 };
 
 /* ============================================================
+   HERO INTERACTIVE EXPERIENCE & BILINGUAL VERSES
+============================================================ */
+var FEATURED_VERSES = [
+  {
+    en: [
+      "Who says that once the <span class=\"hl\">night is over</span>,",
+      "the matter is <span class=\"hl\">forgotten</span>?",
+      "I still remember <span class=\"hl\">his name</span>",
+      "to <span class=\"hl\">this day</span> 💔"
+    ],
+    hi: [
+      "कौन कहता है कि <span class=\"hl\">रात बीती</span> और बात गई,",
+      "अंधेरे ढल भी जाएं तो <span class=\"hl\">यादें नहीं मिटतीं</span>।",
+      "मुझे तो आज भी <span class=\"hl\">उसका नाम</span>",
+      "उसी तरह याद है 💔"
+    ],
+    category: "Midnight Melancholy",
+    emoji: "🌙",
+    author: "Memories — A Heart's Story",
+    likes: 342,
+    id: "hero-v1"
+  },
+  {
+    en: [
+      "The night keeps its secrets well,",
+      "but the heart reveals them all —",
+      "in the silence of a <span class=\"hl\">sleepless dawn</span> ✨"
+    ],
+    hi: [
+      "रात अपने सारे राज़ छुपा लेती है,",
+      "मगर दिल हर बात बयां कर देता है —",
+      "एक <span class=\"hl\">जागती हुई सुबह</span> के सन्नाटे में ✨"
+    ],
+    category: "Quiet Longing",
+    emoji: "✨",
+    author: "A Sleepless Soul",
+    likes: 219,
+    id: "hero-v2"
+  },
+  {
+    en: [
+      "Even wilted roses hold the fragrance of",
+      "a love that once <span class=\"hl\">set the sky on fire</span> 🌹",
+      "memories never truly wither away."
+    ],
+    hi: [
+      "मुरझाए हुए गुलाब भी उस खुशबू को समेटे रखते हैं,",
+      "जिस मोहब्बत ने कभी <span class=\"hl\">आसमान को रोशन</span> किया था 🌹",
+      "यादें कभी सचमुच नहीं मरतीं।"
+    ],
+    category: "Eternal Love",
+    emoji: "🌹",
+    author: "Meera",
+    likes: 412,
+    id: "hero-v3"
+  },
+  {
+    en: [
+      "I wrote your name on water, hoping",
+      "the waves would carry my <span class=\"hl\">longing to your shore</span> 💌",
+      "the sea remembers what I couldn't say."
+    ],
+    hi: [
+      "मैंने पानी पर तेरा नाम लिखा था,",
+      "कि लहरें मेरे दिल की <span class=\"hl\">तड़प तेरे किनारे</span> तक पहुंचा दें 💌",
+      "समंदर सब जानता है जो मैं कह न सका।"
+    ],
+    category: "Unspoken Words",
+    emoji: "💌",
+    author: "Zara",
+    likes: 188,
+    id: "hero-v4"
+  },
+  {
+    en: [
+      "A candle does not mourn the darkness it destroys —",
+      "it simply <span class=\"hl\">burns, and loves</span> until the dawn 🕯️",
+      "giving light to the one who watches."
+    ],
+    hi: [
+      "दीया कभी उस अंधेरे का मातम नहीं मनाता जिसे वो मिटाता है,",
+      "वो तो बस सुबह तक <span class=\"hl\">जलता है, और प्यार करता है</span> 🕯️",
+      "हर देखने वाले को रोशनी देकर।"
+    ],
+    category: "Sacred Hope",
+    emoji: "🕯️",
+    author: "Aryan",
+    likes: 275,
+    id: "hero-v5"
+  },
+  {
+    en: [
+      "Distance is just a test to see how far",
+      "<span class=\"hl\">love can travel</span> across every ocean 🌊",
+      "and mine has found its home in you."
+    ],
+    hi: [
+      "फासले तो सिर्फ एक इम्तिहान हैं,",
+      "कि <span class=\"hl\">मोहब्बत कितनी दूर</span> तक जा सकती है 🌊",
+      "और मेरी मोहब्बत तुझमें आकर ठहर गई।"
+    ],
+    category: "Boundless Love",
+    emoji: "🌊",
+    author: "Ananya",
+    likes: 389,
+    id: "hero-v6"
+  }
+];
+
+var currentFeaturedIdx = 0;
+var currentHeroLang = 'english';
+var heroLikesState = JSON.parse(localStorage.getItem('shayri_hero_likes') || '{}');
+
+function renderFeaturedVerse(idx, lang) {
+  var v = FEATURED_VERSES[idx];
+  if (!v) return;
+
+  var wrap = document.getElementById('verseDisplayWrap');
+  var catEl = document.getElementById('heroVerseCategoryText');
+  var emojiEl = document.getElementById('heroVerseEmoji');
+  var authorEl = document.getElementById('heroAuthorName');
+  var likeCountEl = document.getElementById('heroCardLikeCount');
+  var likeBtn = document.getElementById('heroCardLikeBtn');
+  var textField = document.getElementById('featuredVerseText');
+
+  if (wrap) wrap.classList.add('fading');
+
+  setTimeout(function() {
+    if (catEl) catEl.textContent = v.category;
+    if (emojiEl) emojiEl.textContent = v.emoji;
+    if (authorEl) authorEl.textContent = v.author;
+
+    var isLiked = !!heroLikesState[v.id];
+    var count = v.likes + (isLiked ? 1 : 0);
+    if (likeCountEl) likeCountEl.textContent = count;
+    if (likeBtn) likeBtn.classList.toggle('liked', isLiked);
+
+    var lines = (lang === 'hindi') ? v.hi : v.en;
+    var html = '';
+
+    if (lines.length >= 4) {
+      html += '<p class="shayri-text' + (lang === 'hindi' ? ' hindi-text' : '') + '">';
+      html += '<span class="shayri-line">' + lines[0] + '</span>';
+      html += '<span class="shayri-line">' + lines[1] + '</span>';
+      html += '</p><div class="divider"><span>✦</span></div><p class="shayri-text' + (lang === 'hindi' ? ' hindi-text' : '') + '">';
+      html += '<span class="shayri-line shayri-line2">' + lines[2] + '</span>';
+      html += '<span class="shayri-line shayri-line2">' + lines[3] + '</span>';
+      html += '</p>';
+    } else {
+      html += '<p class="shayri-text' + (lang === 'hindi' ? ' hindi-text' : '') + '">';
+      lines.forEach(function(l, i) {
+        html += '<span class="shayri-line" style="animation-delay:' + (0.1 + i * 0.2) + 's;">' + l + '</span>';
+      });
+      html += '</p>';
+    }
+
+    if (textField) textField.innerHTML = html;
+    if (wrap) wrap.classList.remove('fading');
+  }, 200);
+}
+
+function nextFeaturedVerse() {
+  currentFeaturedIdx = (currentFeaturedIdx + 1) % FEATURED_VERSES.length;
+  renderFeaturedVerse(currentFeaturedIdx, currentHeroLang);
+  burstAt(window.innerWidth / 2, window.innerHeight * 0.55);
+}
+
+function setHeroLanguage(lang) {
+  currentHeroLang = lang;
+  var enBtn = document.getElementById('hl-en');
+  var hiBtn = document.getElementById('hl-hi');
+  if (enBtn) enBtn.classList.toggle('active', lang === 'english');
+  if (hiBtn) hiBtn.classList.toggle('active', lang === 'hindi');
+  renderFeaturedVerse(currentFeaturedIdx, lang);
+}
+
+function copyFeaturedVerse() {
+  var v = FEATURED_VERSES[currentFeaturedIdx];
+  if (!v) return;
+  var lines = (currentHeroLang === 'hindi') ? v.hi : v.en;
+  var cleanText = lines.map(function(l) { return l.replace(/<[^>]*>?/gm, ''); }).join('\n');
+  var fullText = '"' + cleanText + '"\n— ' + v.author + ' (via SoulfulWords)';
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(fullText).then(function() {
+      var copyIcon = document.getElementById('copyIconEl');
+      if (copyIcon) {
+        copyIcon.textContent = '✅';
+        setTimeout(function() { copyIcon.textContent = '📋'; }, 2000);
+      }
+      showToast('📋 Verse copied to clipboard!');
+    });
+  } else {
+    showToast('✨ ' + v.category);
+  }
+}
+
+function toggleHeroLike() {
+  var v = FEATURED_VERSES[currentFeaturedIdx];
+  if (!v) return;
+
+  var likeBtn = document.getElementById('heroCardLikeBtn');
+  var countEl = document.getElementById('heroCardLikeCount');
+  var isLiked = !!heroLikesState[v.id];
+
+  if (isLiked) {
+    delete heroLikesState[v.id];
+  } else {
+    heroLikesState[v.id] = true;
+  }
+  localStorage.setItem('shayri_hero_likes', JSON.stringify(heroLikesState));
+
+  var count = v.likes + (!isLiked ? 1 : 0);
+  if (countEl) countEl.textContent = count;
+
+  if (likeBtn) {
+    likeBtn.classList.toggle('liked', !isLiked);
+    likeBtn.classList.add('pop');
+    setTimeout(function() { likeBtn.classList.remove('pop'); }, 400);
+  }
+
+  showToast(!isLiked ? '💚 Felt in your heart!' : '🤍 Removed like');
+}
+
+function stickerClick(emoji, event) {
+  var x = event ? event.clientX : window.innerWidth / 2;
+  var y = event ? event.clientY : window.innerHeight / 2;
+  burstAt(x, y);
+  showToast(emoji + ' Echoes of the heart');
+}
+
+function navigateFilter(mood) {
+  navigate('explore');
+  setTimeout(function() {
+    renderGrid(mood);
+  }, 100);
+}
+
+/* ============================================================
+   AMBIENT RAIN SERENITY (SYNTHESIZED VIA WEB AUDIO API)
+============================================================ */
+var audioCtx = null;
+var rainNode = null;
+var rainGainNode = null;
+var isRainPlaying = false;
+
+function toggleRainAmbience() {
+  var btn = document.getElementById('ambientToggleBtn');
+  var text = document.getElementById('ambientStatusText');
+
+  if (isRainPlaying) {
+    if (rainGainNode && audioCtx) {
+      rainGainNode.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+      setTimeout(function() {
+        if (rainNode) {
+          try { rainNode.stop(); } catch(e) {}
+          rainNode.disconnect();
+        }
+        isRainPlaying = false;
+        if (btn) btn.classList.remove('active');
+        if (text) text.textContent = 'Play Rain Serenity';
+        showToast('🔇 Rain ambience paused');
+      }, 850);
+    }
+  } else {
+    try {
+      var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      var bufferSize = 2 * audioCtx.sampleRate;
+      var noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      var output = noiseBuffer.getChannelData(0);
+      var b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+
+      for (var i = 0; i < bufferSize; i++) {
+        var white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        b3 = 0.86650 * b3 + white * 0.3104856;
+        b4 = 0.55000 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.0168980;
+        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.035;
+        b6 = white * 0.115926;
+      }
+
+      rainNode = audioCtx.createBufferSource();
+      rainNode.buffer = noiseBuffer;
+      rainNode.loop = true;
+
+      var filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(850, audioCtx.currentTime);
+
+      rainGainNode = audioCtx.createGain();
+      rainGainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+      rainGainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 1.2);
+
+      rainNode.connect(filter);
+      filter.connect(rainGainNode);
+      rainGainNode.connect(audioCtx.destination);
+
+      rainNode.start(0);
+      isRainPlaying = true;
+      if (btn) btn.classList.add('active');
+      if (text) text.textContent = 'Pause Rain Ambience';
+      showToast('🌧️ Gentle rain serenity playing...');
+    } catch (e) {
+      console.warn("Web Audio rain notice:", e);
+      showToast('🎧 Audio active');
+    }
+  }
+}
+
+/* ============================================================
    START REALTIME FIRESTORE LISTENER
 ============================================================ */
 initFirestoreListener();

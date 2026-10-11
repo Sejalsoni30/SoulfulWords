@@ -32,78 +32,204 @@
      PAGE: HOME
 ==================================================== -->
 <div class="page active" id="page-home">
+  <!-- Ambient Audio Floating Pill Player -->
+  <div class="ambient-bar">
+    <button class="ambient-pill-btn" id="ambientToggleBtn" onclick="toggleRainAmbience()" title="Play or pause relaxing night rain ambience">
+      <span class="ambient-pulse-dot" id="ambientDot"></span>
+      <span class="ambient-icon">🎧</span>
+      <span id="ambientStatusText">Play Rain Serenity</span>
+    </button>
+  </div>
+
   <div class="hero">
     <div class="hero-content">
-      <span class="moon-badge">🌙</span>
-      <div class="brand-tag">
-        <span class="brand-dot"></span>
-        <span>Poetry of the Heart</span>
-        <span class="brand-dot"></span>
+      <div class="hero-badges-row">
+        <span class="moon-badge-mini">🌙</span>
+        <div class="brand-tag">
+          <span class="brand-dot"></span>
+          <span>Poetry of the Heart</span>
+          <span class="brand-dot"></span>
+        </div>
+        <div class="live-pill" title="Connected to Google Firebase Firestore">
+          <span class="live-indicator"></span>
+          <span>Cloud Live</span>
+        </div>
       </div>
-      <h1 class="site-title">Shayri</h1>
+
+      <h1 class="site-title">SoulfulWords</h1>
       <p class="site-subtitle">Memories That Never Fade — Poetry That Lasts Forever</p>
+
+      <!-- Quick Action Buttons -->
+      <div class="hero-cta-group">
+        <button class="hero-cta-primary" onclick="navigate('explore')">
+          <span>✨ Explore Collection</span>
+          <span class="cta-arrow">→</span>
+        </button>
+        <button class="hero-cta-secondary" onclick="navigate('submit')">
+          <span>✍️ Share Your Shayri</span>
+        </button>
+      </div>
     </div>
 
+    <!-- MAIN INTERACTIVE FEATURED CARD -->
     <div class="hero-card" id="featured-card">
-      <span class="quote-icon">"</span>
-      <p class="shayri-text">
-        <span class="shayri-line">Who says that once the <span class="hl">night is over</span>,</span>
-        <span class="shayri-line">the matter is <span class="hl">forgotten</span>?</span>
-      </p>
-      <div class="divider"><span>✦</span></div>
-      <p class="shayri-text">
-        <span class="shayri-line shayri-line2">I still remember <span class="hl">his name</span></span>
-        <span class="shayri-line shayri-line2">to <span class="hl">this day</span> 💔</span>
-      </p>
+      <div class="card-glow-aurora"></div>
 
-      <div class="sticker-row">
-        <span class="sticker">🌿</span>
-        <span class="sticker">🌙</span>
-        <span class="sticker">💔</span>
-        <span class="sticker">🍃</span>
-        <span class="sticker">✨</span>
+      <!-- Card Header: Category Pill, Language Switcher & Quick Actions -->
+      <div class="featured-card-header">
+        <div class="featured-category-pill" id="heroVerseCategory">
+          <span id="heroVerseEmoji">🌙</span>
+          <span id="heroVerseCategoryText">Midnight Melancholy</span>
+        </div>
+
+        <!-- Language Toggle for Hero Verse -->
+        <div class="hero-lang-toggle">
+          <button class="hl-btn active" id="hl-en" onclick="setHeroLanguage('english')">🇬🇧 English</button>
+          <button class="hl-btn" id="hl-hi" onclick="setHeroLanguage('hindi')">🇮🇳 हिंदी</button>
+        </div>
+
+        <div class="hero-card-quick-actions">
+          <button class="card-icon-action" onclick="copyFeaturedVerse()" title="Copy this verse">
+            <span id="copyIconEl">📋</span>
+          </button>
+          <button class="card-icon-action" onclick="nextFeaturedVerse()" title="Whisper another verse">
+            <span>🎲</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Verse Content Box (Cross-fading) -->
+      <div class="verse-display-wrap" id="verseDisplayWrap">
+        <span class="quote-icon">“</span>
+        <div class="featured-verse-text" id="featuredVerseText">
+          <p class="shayri-text">
+            <span class="shayri-line">Who says that once the <span class="hl">night is over</span>,</span>
+            <span class="shayri-line">the matter is <span class="hl">forgotten</span>?</span>
+          </p>
+          <div class="divider"><span>✦</span></div>
+          <p class="shayri-text">
+            <span class="shayri-line shayri-line2">I still remember <span class="hl">his name</span></span>
+            <span class="shayri-line shayri-line2">to <span class="hl">this day</span> 💔</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Emotion Stickers Row (Interactive Burst on Click) -->
+      <div class="sticker-row" id="heroStickersRow">
+        <span class="sticker" onclick="stickerClick('🌿', event)" title="Verdant Calm">🌿</span>
+        <span class="sticker" onclick="stickerClick('🌙', event)" title="Moonlit Silence">🌙</span>
+        <span class="sticker" onclick="stickerClick('💔', event)" title="Ache of Memory">💔</span>
+        <span class="sticker" onclick="stickerClick('🍃', event)" title="Whispering Pines">🍃</span>
+        <span class="sticker" onclick="stickerClick('✨', event)" title="Endless Hope">✨</span>
       </div>
 
       <div class="emotion-row">
-        <span class="e-tag a">💚 Memory</span>
-        <span class="e-tag b">🌿 Nature</span>
-        <span class="e-tag c">🌙 Night</span>
-        <span class="e-tag a">✨ Love</span>
-        <span class="e-tag b">🥀 Longing</span>
+        <span class="e-tag a" onclick="navigateFilter('memories')">💚 Memory</span>
+        <span class="e-tag b" onclick="navigateFilter('love')">🌿 Nature</span>
+        <span class="e-tag c" onclick="navigateFilter('night')">🌙 Night</span>
+        <span class="e-tag a" onclick="navigateFilter('love')">✨ Love</span>
+        <span class="e-tag b" onclick="navigateFilter('longing')">🥀 Longing</span>
       </div>
 
-      <div class="author-tag">
-        <div class="author-av">🖊️</div>
-        <div class="author-info">
-          <small>Featured Poetry</small>
-          <strong>Memories — A Heart's Story</strong>
+      <!-- Card Footer: Author + Like Counter + Cycle Button -->
+      <div class="featured-card-footer">
+        <div class="author-tag" style="margin:0;padding:0;border:none;">
+          <div class="author-av" id="heroAuthorAv">🖊️</div>
+          <div class="author-info">
+            <small id="heroAuthorBadge">Featured Poetry</small>
+            <strong id="heroAuthorName">Memories — A Heart's Story</strong>
+          </div>
+        </div>
+
+        <div class="card-footer-buttons">
+          <button class="hero-cycle-btn" onclick="nextFeaturedVerse()">
+            <span>✨ Next Verse</span>
+          </button>
+          <button class="hero-like-btn" id="heroCardLikeBtn" onclick="toggleHeroLike()" title="Heart this poem">
+            <span class="heart-icon">💚</span>
+            <span id="heroCardLikeCount">342</span>
+          </button>
         </div>
       </div>
     </div>
 
+    <!-- Community Stats Strip -->
+    <div class="hero-stats-strip reveal">
+      <div class="stat-box">
+        <div class="stat-number">50+</div>
+        <div class="stat-label">Curated Poems</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-box">
+        <div class="stat-number" id="statsLikeCount">3.8k+</div>
+        <div class="stat-label">Hearts Felt</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-box">
+        <div class="stat-number">2 Langs</div>
+        <div class="stat-label">Hindi &amp; English</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-box">
+        <div class="stat-number">⚡ Cloud</div>
+        <div class="stat-label">Live Firestore</div>
+      </div>
+    </div>
+
     <div class="scroll-hint">
-      <span>Explore More</span>
+      <span>Scroll for More Verses</span>
       <div class="scroll-arrow"></div>
     </div>
   </div>
 
-  <!-- Reflection card below hero -->
-  <div style="padding:5rem 1.5rem 6rem;display:flex;justify-content:center;">
-    <div class="hero-card reveal" style="max-width:660px;text-align:center;">
+  <!-- TRENDING MOODS & COMMUNITY SPOTLIGHT STRIP -->
+  <div class="hero-spotlight-section reveal">
+    <div class="section-badge-center">
+      <span>✦ TONIGHT'S ECHOES ✦</span>
+    </div>
+    <h2 class="spotlight-title">Poetic Moods for the Wandering Heart</h2>
+    <p class="spotlight-subtitle">Choose a feeling or let words discover your emotions</p>
+
+    <div class="spotlight-grid">
+      <div class="spotlight-card" onclick="navigateFilter('night')">
+        <div class="sc-icon">🌙</div>
+        <div class="sc-tag">Midnight Silence</div>
+        <p class="sc-quote">&ldquo;Who says that once the night is over, the matter is forgotten?&rdquo;</p>
+        <span class="sc-link">Read Night Shayri →</span>
+      </div>
+      <div class="spotlight-card" onclick="navigateFilter('love')">
+        <div class="sc-icon">💚</div>
+        <div class="sc-tag">Eternal Love</div>
+        <p class="sc-quote">&ldquo;Distance is just a test to see how far love can travel across the sea.&rdquo;</p>
+        <span class="sc-link">Read Love Shayri →</span>
+      </div>
+      <div class="spotlight-card" onclick="navigateFilter('pain')">
+        <div class="sc-icon">💔</div>
+        <div class="sc-tag">Sweet Ache</div>
+        <p class="sc-quote">&ldquo;Some names are not forgotten, they are simply hidden under tears.&rdquo;</p>
+        <span class="sc-link">Read Ache Shayri →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reflection Card -->
+  <div style="padding:4rem 1.5rem 5rem;display:flex;justify-content:center;">
+    <div class="hero-card reveal" style="max-width:720px;text-align:center;">
       <p class="form-label" style="margin-bottom:1.2rem;">🌿 Reflection — A Verse to Remember</p>
-      <p class="shayri-text" style="font-size:clamp(1rem,2.5vw,1.4rem);">
+      <p class="shayri-text" style="font-size:clamp(1.1rem,2.5vw,1.45rem);">
         &ldquo;The night may end,<br/>
         but love leaves its mark —<br/>
         I carry his name like a prayer,<br/>
         long after the stars have gone quiet.&rdquo;
       </p>
       <div class="emotion-row">
-        <span class="e-tag c">🌙 Moonlight</span>
-        <span class="e-tag a">✨ Emerald Stars</span>
-        <span class="e-tag b">💚 Heart</span>
+        <span class="e-tag c" onclick="navigateFilter('night')">🌙 Moonlight</span>
+        <span class="e-tag a" onclick="navigateFilter('hope')">✨ Emerald Stars</span>
+        <span class="e-tag b" onclick="navigateFilter('love')">💚 Heart</span>
       </div>
-      <div style="margin-top:1.5rem;">
-        <button class="nav-submit-btn" onclick="navigate('explore')">✨ Read More Shayri →</button>
+      <div style="margin-top:2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <button class="nav-submit-btn" onclick="navigate('explore')">✨ Read Full Collection →</button>
+        <button class="nav-btn" style="padding:.65rem 1.6rem;" onclick="navigate('submit')">✍️ Share Your Own</button>
       </div>
     </div>
   </div>
