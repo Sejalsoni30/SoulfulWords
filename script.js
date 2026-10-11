@@ -1231,14 +1231,25 @@ function startBansuriFluteTrack() {
     } catch(e) {}
   });
 
-  // Raag Bhairavi / Shivaranjani melodic notes
-  var fluteScale = [261.63, 293.66, 311.13, 392.00, 415.30, 466.16, 523.25, 622.25];
+  // Raag Shivaranjani & Bhairavi emotive phrases (C, D, Eb, G, A, C')
+  var fluteMotifs = [
+    [261.63, 293.66, 311.13, 392.00],          // Ascending longing
+    [392.00, 440.00, 523.25, 392.00],          // High emotive crest
+    [523.25, 440.00, 392.00, 311.13, 293.66],  // Gentle descending meend
+    [293.66, 311.13, 293.66, 261.63],          // Restful cadence on root Sa
+    [392.00, 311.13, 392.00, 523.25]           // Yearning swell
+  ];
+
+  var motifIdx = 0;
+  var stepIdx = 0;
 
   function playFlutePhrase() {
     if (!isMusicPlaying) return;
     try {
-      var note = fluteScale[Math.floor(Math.random() * fluteScale.length)];
-      var duration = 1.8 + Math.random() * 1.5;
+      var currentMotif = fluteMotifs[motifIdx % fluteMotifs.length];
+      var note = currentMotif[stepIdx % currentMotif.length];
+      var isLastInMotif = (stepIdx === currentMotif.length - 1);
+      var duration = isLastInMotif ? (2.4 + Math.random() * 0.8) : (1.4 + Math.random() * 0.6);
       var now = musicAudioCtx.currentTime;
 
       var osc = musicAudioCtx.createOscillator();
@@ -1246,27 +1257,32 @@ function startBansuriFluteTrack() {
       var noteGain = musicAudioCtx.createGain();
       var filter = musicAudioCtx.createBiquadFilter();
 
-      // Expressive vibrato LFO
+      // Expressive vibrato LFO (starts subtle and blooms)
       var lfo = musicAudioCtx.createOscillator();
       var lfoGain = musicAudioCtx.createGain();
-      lfo.frequency.setValueAtTime(4.6, now);
-      lfoGain.gain.setValueAtTime(4.5, now);
+      lfo.frequency.setValueAtTime(4.8, now);
+      lfoGain.gain.setValueAtTime(1.0, now);
+      lfoGain.gain.linearRampToValueAtTime(4.8, now + 0.6); // Vibrato blooms into note
       lfo.connect(osc.frequency);
       lfo.connect(subOsc.frequency);
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(note, now);
+      // Subtle portamento glide into note
+      osc.frequency.setValueAtTime(note * 0.985, now);
+      osc.frequency.exponentialRampToValueAtTime(note, now + 0.12);
 
       subOsc.type = 'triangle';
-      subOsc.frequency.setValueAtTime(note * 2, now);
+      subOsc.frequency.setValueAtTime(note * 2 * 0.985, now);
+      subOsc.frequency.exponentialRampToValueAtTime(note * 2, now + 0.12);
 
       filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(note * 1.2, now);
-      filter.Q.setValueAtTime(2.2, now);
+      filter.frequency.setValueAtTime(note * 1.3, now);
+      filter.Q.setValueAtTime(2.0, now);
 
+      var peakVol = isLastInMotif ? 0.28 : 0.22;
       noteGain.gain.setValueAtTime(0.001, now);
-      noteGain.gain.linearRampToValueAtTime(0.24, now + 0.45);
-      noteGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      noteGain.gain.linearRampToValueAtTime(peakVol, now + 0.35);
+      noteGain.gain.exponentialRampToValueAtTime(0.0005, now + duration);
 
       osc.connect(filter);
       subOsc.connect(filter);
@@ -1282,9 +1298,15 @@ function startBansuriFluteTrack() {
       subOsc.stop(now + duration + 0.1);
 
       musicActiveNodes.push(osc, subOsc, lfo, noteGain, filter);
+
+      stepIdx++;
+      if (stepIdx >= currentMotif.length) {
+        stepIdx = 0;
+        motifIdx = (motifIdx + 1) % fluteMotifs.length;
+      }
     } catch(e) {}
 
-    var pause = (duration * 1000) + 300 + Math.random() * 900;
+    var pause = (duration * 1000) + (isLastInMotif ? (1200 + Math.random() * 800) : 180);
     var t = setTimeout(playFlutePhrase, pause);
     musicTimers.push(t);
   }
@@ -1557,7 +1579,9 @@ function updateMusicPlayerUI() {
   }
 
   if (playIcon) {
-    playIcon.textContent = isMusicPlaying ? '⏸' : '▶';
+    playIcon.innerHTML = isMusicPlaying
+      ? '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
   }
 
   // Update active state in track list

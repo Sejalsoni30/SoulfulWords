@@ -20,24 +20,15 @@
 <!-- ======== NAVBAR ======== -->
 <nav>
   <a href="#" class="nav-logo" id="navLogo" onclick="navigate('home');return false;">Shayri 🌿</a>
-  <ul class="nav-pages">
-    <li><button class="nav-btn active" onclick="navigate('home')"   id="nb-home">🏠 Home</button></li>
-    <li><button class="nav-btn"        onclick="navigate('explore')" id="nb-explore">✨ Explore</button></li>
-    <li><button class="nav-btn"        onclick="navigate('about')"   id="nb-about">💫 About</button></li>
-    <li><button class="nav-submit-btn" onclick="navigate('submit')">✍️ Add Shayri</button></li>
-  </ul>
-</nav>
 
-<!-- ===================================================
-     PAGE: HOME
-==================================================== -->
-<div class="page active" id="page-home">
-  <!-- Soulful Music Floating Player Dock -->
-  <div class="ambient-bar">
+  <!-- Integrated Soulful Music Player Dock (Globally accessible on all pages) -->
+  <div class="nav-music-dock">
     <div class="music-player-pill" id="musicPlayerPill">
       <!-- Play / Pause Button -->
-      <button class="music-pill-ctrl" id="musicToggleBtn" onclick="toggleMusicPlayback()" title="Play or pause soulful background music">
-        <span class="music-play-icon" id="musicPlayIcon">▶</span>
+      <button class="music-pill-ctrl" id="musicToggleBtn" onclick="toggleMusicPlayback()" title="Play or pause soulful background music" aria-label="Play or pause music">
+        <span class="music-play-icon" id="musicPlayIcon">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </span>
       </button>
 
       <!-- Equalizer Visualizer Bars -->
@@ -48,14 +39,16 @@
       </div>
 
       <!-- Current Track Info & Menu Trigger -->
-      <div class="music-meta" onclick="toggleTrackMenu()" title="Click to choose a music mood">
+      <div class="music-meta" onclick="toggleTrackMenu()" title="Click to choose a soulful mood">
         <span class="music-tag">MUSIC</span>
         <span class="music-title" id="musicTitleText">🎹 Melancholy Piano</span>
       </div>
 
       <!-- Quick Next Track Button (Changes music anytime!) -->
-      <button class="music-pill-skip" onclick="nextMusicTrack()" title="Next Track (Changes music anytime!)">
-        <span>⏭️</span>
+      <button class="music-pill-skip" onclick="nextMusicTrack()" title="Next Track (Changes music anytime!)" aria-label="Next track">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+          <path d="M5 18l8.5-6L5 6v12zm10-12v12h2V6h-2z"/>
+        </svg>
       </button>
 
       <!-- Track Dropdown Selector Menu -->
@@ -100,6 +93,18 @@
     </div>
   </div>
 
+  <ul class="nav-pages">
+    <li><button class="nav-btn active" onclick="navigate('home')"   id="nb-home">🏠 Home</button></li>
+    <li><button class="nav-btn"        onclick="navigate('explore')" id="nb-explore">✨ Explore</button></li>
+    <li><button class="nav-btn"        onclick="navigate('about')"   id="nb-about">💫 About</button></li>
+    <li><button class="nav-submit-btn" onclick="navigate('submit')">✍️ Add Shayri</button></li>
+  </ul>
+</nav>
+
+<!-- ===================================================
+     PAGE: HOME
+==================================================== -->
+<div class="page active" id="page-home">
   <div class="hero">
     <div class="hero-content">
       <div class="hero-badges-row">
