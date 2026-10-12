@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Shayri — Memories That Never Fade</title>
   <meta name="description" content="A heartfelt collection of Shayri in Hindi and English. Read, feel, and share your own poetry." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,6 +16,50 @@
 <canvas id="stars-canvas"></canvas>
 <div class="emoji-layer" id="emojiLayer"></div>
 <div id="toast">✨ Shayri added successfully!</div>
+<div class="music-dropdown-backdrop" id="musicDropdownBackdrop" onclick="toggleTrackMenu()"></div>
+
+<!-- Track Dropdown Selector Menu (Mounted at body level to avoid backdrop-filter traps) -->
+<div class="music-dropdown" id="musicDropdown">
+  <div class="music-dropdown-header">
+    <span>🎵 Select Soulful Mood</span>
+    <button class="music-dropdown-close" onclick="toggleTrackMenu();event.stopPropagation();" aria-label="Close track selector">✕</button>
+  </div>
+  <div class="music-track-item active" id="mtrack-0" onclick="selectMusicTrack(0)">
+    <span class="mti-icon">🎹</span>
+    <div class="mti-body">
+      <span class="mti-name">Melancholy Piano</span>
+      <span class="mti-desc">Deep nocturnal piano arpeggios</span>
+    </div>
+  </div>
+  <div class="music-track-item" id="mtrack-1" onclick="selectMusicTrack(1)">
+    <span class="mti-icon">🪈</span>
+    <div class="mti-body">
+      <span class="mti-name">Soulful Bansuri Flute</span>
+      <span class="mti-desc">Meditative longing & warm strings</span>
+    </div>
+  </div>
+  <div class="music-track-item" id="mtrack-2" onclick="selectMusicTrack(2)">
+    <span class="mti-icon">🌧️</span>
+    <div class="mti-body">
+      <span class="mti-name">Midnight Rain & Chimes</span>
+      <span class="mti-desc">Gentle night rainfall & crystal wind bells</span>
+    </div>
+  </div>
+  <div class="music-track-item" id="mtrack-3" onclick="selectMusicTrack(3)">
+    <span class="mti-icon">💫</span>
+    <div class="mti-body">
+      <span class="mti-name">Starlit Lo-Fi Dreams</span>
+      <span class="mti-desc">Warm 7th chords & nostalgic vinyl pulse</span>
+    </div>
+  </div>
+  <div class="music-track-item" id="mtrack-4" onclick="selectMusicTrack(4)">
+    <span class="mti-icon">🍃</span>
+    <div class="mti-body">
+      <span class="mti-name">Forest Mist & Singing Bowls</span>
+      <span class="mti-desc">Peaceful harmonic drone & tranquil bells</span>
+    </div>
+  </div>
+</div>
 
 <!-- ======== NAVBAR ======== -->
 <nav>
@@ -50,46 +94,6 @@
           <path d="M5 18l8.5-6L5 6v12zm10-12v12h2V6h-2z"/>
         </svg>
       </button>
-
-      <!-- Track Dropdown Selector Menu -->
-      <div class="music-dropdown" id="musicDropdown">
-        <div class="music-dropdown-header">🎵 Select Soulful Mood</div>
-        <div class="music-track-item active" id="mtrack-0" onclick="selectMusicTrack(0)">
-          <span class="mti-icon">🎹</span>
-          <div class="mti-body">
-            <span class="mti-name">Melancholy Piano</span>
-            <span class="mti-desc">Deep nocturnal piano arpeggios</span>
-          </div>
-        </div>
-        <div class="music-track-item" id="mtrack-1" onclick="selectMusicTrack(1)">
-          <span class="mti-icon">🪈</span>
-          <div class="mti-body">
-            <span class="mti-name">Soulful Bansuri Flute</span>
-            <span class="mti-desc">Meditative longing & warm strings</span>
-          </div>
-        </div>
-        <div class="music-track-item" id="mtrack-2" onclick="selectMusicTrack(2)">
-          <span class="mti-icon">🌧️</span>
-          <div class="mti-body">
-            <span class="mti-name">Midnight Rain & Chimes</span>
-            <span class="mti-desc">Gentle night rainfall & crystal wind bells</span>
-          </div>
-        </div>
-        <div class="music-track-item" id="mtrack-3" onclick="selectMusicTrack(3)">
-          <span class="mti-icon">💫</span>
-          <div class="mti-body">
-            <span class="mti-name">Starlit Lo-Fi Dreams</span>
-            <span class="mti-desc">Warm 7th chords & nostalgic vinyl pulse</span>
-          </div>
-        </div>
-        <div class="music-track-item" id="mtrack-4" onclick="selectMusicTrack(4)">
-          <span class="mti-icon">🍃</span>
-          <div class="mti-body">
-            <span class="mti-name">Forest Mist & Singing Bowls</span>
-            <span class="mti-desc">Peaceful harmonic drone & tranquil bells</span>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -97,9 +101,31 @@
     <li><button class="nav-btn active" onclick="navigate('home')"   id="nb-home">🏠 Home</button></li>
     <li><button class="nav-btn"        onclick="navigate('explore')" id="nb-explore">✨ Explore</button></li>
     <li><button class="nav-btn"        onclick="navigate('about')"   id="nb-about">💫 About</button></li>
-    <li><button class="nav-submit-btn" onclick="navigate('submit')">✍️ Add Shayri</button></li>
+    <li><button class="nav-submit-btn" onclick="navigate('submit')"  id="nb-submit">✍️ Add Shayri</button></li>
   </ul>
 </nav>
+
+<!-- ======== MOBILE BOTTOM APP BAR DOCK ======== -->
+<div class="mobile-bottom-nav" id="mobileBottomNav" role="navigation" aria-label="Mobile Navigation">
+  <button class="mb-nav-item active" id="mb-home" onclick="navigate('home')">
+    <span class="mb-nav-icon">🏠</span>
+    <span class="mb-nav-text">Home</span>
+  </button>
+  <button class="mb-nav-item" id="mb-explore" onclick="navigate('explore')">
+    <span class="mb-nav-icon">✨</span>
+    <span class="mb-nav-text">Explore</span>
+  </button>
+  <button class="mb-nav-item mb-action" id="mb-submit" onclick="navigate('submit')" aria-label="Add Shayri">
+    <div class="mb-action-circle">
+      <span class="mb-action-icon">✍️</span>
+    </div>
+    <span class="mb-nav-text">Add</span>
+  </button>
+  <button class="mb-nav-item" id="mb-about" onclick="navigate('about')">
+    <span class="mb-nav-icon">💫</span>
+    <span class="mb-nav-text">About</span>
+  </button>
+</div>
 
 <!-- ===================================================
      PAGE: HOME
@@ -277,7 +303,7 @@
   </div>
 
   <!-- Reflection Card -->
-  <div style="padding:4rem 1.5rem 5rem;display:flex;justify-content:center;">
+  <div class="reflection-section">
     <div class="hero-card reveal" style="max-width:720px;text-align:center;">
       <p class="form-label" style="margin-bottom:1.2rem;">🌿 Reflection — A Verse to Remember</p>
       <p class="shayri-text" style="font-size:clamp(1.1rem,2.5vw,1.45rem);">

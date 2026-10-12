@@ -23,33 +23,23 @@ var SEED = [
 
 /* ============================================================
    FIREBASE CLOUD FIRESTORE INITIALIZATION
-   Reads environment configuration from window.firebaseConfig (config.js)
-   with fallback defaults for zero-config production deployments
+   Reads runtime configuration securely from window.firebaseConfig (config.js)
 ============================================================ */
-var DEFAULT_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAOTRAuoCWlTMSxXUr1Ze7gNsu3ItwuC3c",
-  authDomain: "soulmatewords-1b474.firebaseapp.com",
-  projectId: "soulmatewords-1b474",
-  storageBucket: "soulmatewords-1b474.firebasestorage.app",
-  messagingSenderId: "469339484488",
-  appId: "1:469339484488:web:1071d1ad881928701e837d"
-};
-
-var firebaseConfig = window.firebaseConfig || DEFAULT_FIREBASE_CONFIG;
+var firebaseConfig = window.firebaseConfig || null;
 
 var db = null;
 var firestoreShayris = [];
 var isFirestoreOnline = false;
 
 try {
-  if (firebaseConfig && typeof firebase !== 'undefined' && firebase.initializeApp) {
+  if (firebaseConfig && firebaseConfig.apiKey && typeof firebase !== 'undefined' && firebase.initializeApp) {
     if (!firebase.apps || !firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
     db = firebase.firestore();
     console.log("🔥 Firebase initialized for project:", firebaseConfig.projectId);
-  } else if (!firebaseConfig) {
-    console.warn("⚠️ No Firebase config detected. Please ensure config.js is loaded with your Firebase credentials.");
+  } else {
+    console.log("🌿 Running in standalone mode. config.js supplies cloud credentials.");
   }
 } catch (e) {
   console.warn("Firebase initialization notice:", e);
@@ -231,14 +221,22 @@ function getAllShayris() {
    NAVIGATION (SPA ROUTER)
 ============================================================ */
 function navigate(page) {
+  // close music dropdown if open
+  var drop = document.getElementById('musicDropdown');
+  var bdrop = document.getElementById('musicDropdownBackdrop');
+  if (drop) drop.classList.remove('open');
+  if (bdrop) bdrop.classList.remove('open');
+
   // hide current page
   var old = document.getElementById('page-' + currentPage);
   if (old) { old.classList.remove('active'); }
 
-  // update nav buttons
-  ['home', 'explore', 'about'].forEach(function(p) {
+  // update desktop nav buttons & mobile bottom bar items
+  ['home', 'explore', 'about', 'submit'].forEach(function(p) {
     var btn = document.getElementById('nb-' + p);
     if (btn) btn.classList.remove('active');
+    var mb = document.getElementById('mb-' + p);
+    if (mb) mb.classList.remove('active');
   });
 
   currentPage = page;
@@ -250,6 +248,8 @@ function navigate(page) {
 
   var activeBtn = document.getElementById('nb-' + page);
   if (activeBtn) activeBtn.classList.add('active');
+  var activeMb = document.getElementById('mb-' + page);
+  if (activeMb) activeMb.classList.add('active');
 
   if (page === 'explore') renderGrid(activeFilter);
   if (page === 'submit')  resetForm();
@@ -302,9 +302,10 @@ function renderGrid(filter) {
           '<div class="s-card-author">✍️ ' + (s.author || 'Anonymous') + '</div>',
           '<div class="s-card-tag">' + moodLabel(s.mood) + '</div>',
         '</div>',
-        '<div style="display:flex;align-items:center;gap:.4rem;">',
+        '<div style="display:flex;align-items:center;gap:.5rem;">',
+          '<button class="s-card-copy" onclick="copyCardVerse(this, \'' + s.id + '\')" title="Copy Shayri" aria-label="Copy Shayri">📋</button>',
           '<span style="font-size:.78rem;color:rgba(167,243,208,.6);" id="lc-' + s.id + '">' + (s.likes || 0) + '</span>',
-          '<button class="s-card-like ' + (liked ? 'liked' : '') + '" id="lb-' + s.id + '" onclick="toggleLike(\'' + s.id + '\')" title="Like">💚</button>',
+          '<button class="s-card-like ' + (liked ? 'liked' : '') + '" id="lb-' + s.id + '" onclick="toggleLike(\'' + s.id + '\')" title="Like" aria-label="Like Shayri">💚</button>',
         '</div>',
       '</div>',
     ].join('');
@@ -312,6 +313,25 @@ function renderGrid(filter) {
   });
 
   setTimeout(initReveal, 50);
+}
+
+function copyCardVerse(btn, id) {
+  var all = getAllShayris();
+  var s = all.filter(function(x) { return x.id === id; })[0];
+  if (!s) return;
+  var textToCopy = s.text + '\n— ' + (s.author || 'Anonymous Poet') + ' (via SoulfulWords)';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy).then(function() {
+      if (btn) {
+        var orig = btn.innerHTML;
+        btn.innerHTML = '✅';
+        setTimeout(function() { btn.innerHTML = orig; }, 1800);
+      }
+      showToast('📋 Shayri copied to clipboard!');
+    });
+  } else {
+    showToast('✨ ' + (s.author || 'Anonymous'));
+  }
 }
 
 function moodLabel(mood) {
@@ -1635,7 +1655,9 @@ function selectMusicTrack(index) {
     isMusicPlaying = true;
     startMusicPlayback(currentMusicTrackIdx);
     var drop = document.getElementById('musicDropdown');
+    var bdrop = document.getElementById('musicDropdownBackdrop');
     if (drop) drop.classList.remove('open');
+    if (bdrop) bdrop.classList.remove('open');
     var track = SOULFUL_TRACKS[currentMusicTrackIdx];
     showToast('✨ Now Playing: ' + track.name);
   }
@@ -1643,8 +1665,10 @@ function selectMusicTrack(index) {
 
 function toggleTrackMenu() {
   var drop = document.getElementById('musicDropdown');
+  var bdrop = document.getElementById('musicDropdownBackdrop');
   if (drop) {
-    drop.classList.toggle('open');
+    var isOpen = drop.classList.toggle('open');
+    if (bdrop) bdrop.classList.toggle('open', isOpen);
   }
 }
 
@@ -1652,9 +1676,11 @@ function toggleTrackMenu() {
 document.addEventListener('click', function(e) {
   var pill = document.getElementById('musicPlayerPill');
   var drop = document.getElementById('musicDropdown');
+  var bdrop = document.getElementById('musicDropdownBackdrop');
   if (drop && drop.classList.contains('open')) {
-    if (!pill || !pill.contains(e.target)) {
+    if (!pill || (!pill.contains(e.target) && !drop.contains(e.target))) {
       drop.classList.remove('open');
+      if (bdrop) bdrop.classList.remove('open');
     }
   }
 });
